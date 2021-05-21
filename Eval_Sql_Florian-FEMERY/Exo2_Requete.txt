@@ -1,0 +1,77 @@
+1)-- Liste des contacts français :
+    SELECT CompanyName , ContactName , ContactTitle , Phone
+    FROM customers
+    WHERE Country = "France";
+
+
+2)-- Produits vendus par le fournisseur « Exotic Liquids » :
+    SELECT ProductName , UnitPrice 
+    FROM products
+    WHERE SupplierID = "1";
+
+
+3)-- Nombre de produits vendus par les fournisseurs Français dans l’ordre décroissant :
+    SELECT CompanyName, COUNT(UnitsOnOrder) as 'Nombre produits'
+    FROM suppliers
+    Join products on products.SupplierID = suppliers.SupplierID
+    WHERE Country ='France'
+    GROUP BY CompanyName
+    ORDER BY COUNT(UnitsOnOrder) DESC;
+
+
+4)-- Liste des clients Français ayant plus de 10 commandes :
+    SELECT CompanyName , COUNT(OrderID) AS "Nbre commandes"
+    FROM customers
+    JOIN orders ON orders.CustomerID = customers.CustomerID
+    WHERE Country ='France'
+    GROUP BY CompanyName
+    HAVING COUNT(OrderID) >10;
+
+
+5)-- Liste des clients ayant un chiffre d’affaires > 30.000 :
+    SELECT CompanyName , SUM(UnitPrice * Quantity) AS CA , Country
+    FROM customers
+    JOIN orders ON orders.CustomerID = customers.CustomerID
+    JOIN order_details ON order_details.OrderID = orders.OrderID
+    GROUP BY CompanyName , Country
+    HAVING SUM(UnitPrice * Quantity) > 30000
+    ORDER BY CA DESC;
+
+
+6)-- Liste des pays dont les clients ont passé commande de produits fournis par « Exotic Liquids » :
+    SELECT ShipCountry
+    FROM orders 
+    JOIN order_details on order_details.OrderID = orders.OrderID 
+    JOIN products ON products.ProductID = order_details.ProductID
+    JOIN suppliers ON suppliers.SupplierID = products.SupplierID
+    WHERE suppliers.CompanyName = 'Exotic Liquids'
+    GROUP BY ShipCountry;
+
+
+7)-- Montant des ventes de 1997 :
+    SELECT SUM(UnitPrice*Quantity) AS 'Montant des ventes 1997'
+    FROM order_details
+    JOIN orders ON orders.OrderID = order_details.OrderID
+    WHERE YEAR(OrderDate) ='1997';
+
+
+8)-- Montant des ventes de 1997 mois par mois :
+    SELECT MONTH(OrderDate) AS MOIS , SUM(UnitPrice*Quantity) AS 'Montant des ventes 1997'
+    FROM order_details
+    JOIN orders ON orders.OrderID = order_details.OrderID
+    WHERE YEAR(OrderDate) ='1997'
+    GROUP BY MONTH(OrderDate)
+    ORDER BY MONTH(OrderDate) ASC;
+
+
+9)-- Depuis quelle date le client « Du monde entier » n’a plus commandé ?
+    SELECT MAX(OrderDate) AS 'Date de dernière commande'
+    FROM orders
+    JOIN customers ON customers.CustomerID = orders.CustomerID
+    WHERE CompanyName ='Du monde entier';
+
+
+10)-- Quel est le délai moyen de livraison en jours ?
+    SELECT AVG(DATEDIFF(ShippedDate , OrderDate)) AS 'Délai moyen de livraisson en jours'
+    FROM orders;
+
